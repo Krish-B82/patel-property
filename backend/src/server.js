@@ -2,6 +2,9 @@
 const cors = require('cors');
 const dotenv = require('dotenv');
 
+// Import routes
+const authRoutes = require('./routes/auth.routes');
+
 // Load environment variables
 dotenv.config();
 
@@ -20,8 +23,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Auth routes
+app.use('/api/auth', authRoutes);
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log('Server is running on port ' + PORT);
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/auth`);
 });
