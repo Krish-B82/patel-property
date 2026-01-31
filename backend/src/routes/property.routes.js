@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Import middleware
 const authMiddleware = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 // Import controller functions
 const {
@@ -10,7 +11,9 @@ const {
     getAllProperties,
     getPropertyById,
     updateProperty,
-    deleteProperty
+    deleteProperty,
+    uploadImages,
+    deleteImage
 } = require('../controllers/propertyController');
 
 // PUBLIC ROUTES (No authentication required - anyone can access)
@@ -23,5 +26,9 @@ router.get('/:id', getPropertyById);         // Get single property details
 router.post('/', authMiddleware, createProperty);        // Create new property
 router.put('/:id', authMiddleware, updateProperty);      // Update property
 router.delete('/:id', authMiddleware, deleteProperty);   // Delete property
+
+// IMAGE ROUTES (Admin only)
+router.post('/:id/images', authMiddleware, upload.array('images', 6), uploadImages);   // Upload images
+router.delete('/:id/images/:imageIndex', authMiddleware, deleteImage);                  // Delete single image
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const cloudinary = require('../config/cloudinary');
 
 // Create new property (Admin only)
 const createProperty = async (req, res) => {
@@ -45,7 +46,7 @@ const createProperty = async (req, res) => {
         area_sqft: area_sqft ? parseInt(area_sqft) : null,
         property_type,
         status: status || 'available',
-        images: [] // Empty array for now, will add images in Day 5
+        images: []
       }
     });
 
@@ -75,7 +76,7 @@ const getAllProperties = async (req, res) => {
     if (req.query.location) {
       filter.location = {
         contains: req.query.location,
-        mode: 'insensitive' // Case-insensitive search
+        mode: 'insensitive'
       };
     }
 
@@ -111,7 +112,7 @@ const getAllProperties = async (req, res) => {
     if (req.query.status) {
       filter.status = req.query.status;
     } else {
-      filter.status = 'available'; // By default, only show available properties
+      filter.status = 'available';
     }
 
     // Pagination
@@ -130,7 +131,7 @@ const getAllProperties = async (req, res) => {
       skip: skip,
       take: limit,
       orderBy: {
-        created_at: 'desc' // Newest first
+        created_at: 'desc'
       }
     });
 
@@ -298,11 +299,154 @@ const deleteProperty = async (req, res) => {
   }
 };
 
+// Upload images to property (Admin only)
+const uploadImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if property exists
+    const property = await prisma.property.findUnique({
+      where: { id: id }
+    });
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: 'Property not found'
+      });
+    }
+
+    // Check if files uploaded
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No images uploaded'
+      });
+    }
+
+    // Check total images limit (max 6)
+    const totalImages = property.images.length + req.files.length;
+    if (totalImages > 6) {
+      return res.status(400).json({
+        success: false,
+        message: `Too many images. Current: ${property.images.length}, uploading: ${req.files.length}, max allowed: 6`
+      });
+    }
+
+    // Upload each image to Cloudinary
+    const uploadedUrls = [];
+    for (const file of req.files) {
+      const base64 = file.buffer.toString('base64');
+      const dataURI = `data:${file.mimetype};base64,${base64}`;
+
+      const result = await cloudinary.uploader.upload(dataURI, {
+        folder: 'patel-property',
+        quality: 'auto',
+        fetch_format: 'auto'
+      });
+
+      uploadedUrls.push(result.secure_url);
+    }
+
+    // Add new URLs to existing images array
+    const updatedImages = [...property.images, ...uploadedUrls];
+
+    // Update property with new images
+    const updatedProperty = await prisma.property.update({
+      where: { id: id },
+      data: { images: updatedImages }
+    });
+
+    res.json({
+      success: true,
+      message: `${uploadedUrls.length} image(s) uploaded successfully`,
+      images: updatedProperty.images,
+      totalImages: updatedProperty.images.length
+    });
+
+  } catch (error) {
+    console.error('Upload images error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error uploading images',
+      error: error.message
+    });
+  }
+};
+
+// Delete single image from property (Admin only)
+const deleteImage = async (req, res) => {
+  try {
+    const { id, imageIndex } = req.params;
+
+    // Check if property exists
+    const property = await prisma.property.findUnique({
+      where: { id: id }
+    });
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: 'Property not found'
+      });
+    }
+
+    const index = parseInt(imageIndex);
+
+    // Check if index is valid
+    if (index < 0 || index >= property.images.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid image index'
+      });
+    }
+
+    // Get image URL to delete
+    const imageUrl = property.images[index];
+
+    // Extract public_id from Cloudinary URL
+    // URL format: https://res.cloudinary.com/cloud_name/image/upload/v123/folder/public_id.ext
+    const parts = imageUrl.split('/');
+    const publicIdWithExt = parts[parts.length - 1];
+    const folder = parts[parts.length - 2];
+    const publicId = `${folder}/${publicIdWithExt.split('.')[0]}`;
+
+    // Delete from Cloudinary
+    await cloudinary.uploader.destroy(publicId);
+
+    // Remove from array
+    const updatedImages = property.images.filter((_, i) => i !== index);
+
+    // Update property
+    const updatedProperty = await prisma.property.update({
+      where: { id: id },
+      data: { images: updatedImages }
+    });
+
+    res.json({
+      success: true,
+      message: 'Image deleted successfully',
+      images: updatedProperty.images,
+      totalImages: updatedProperty.images.length
+    });
+
+  } catch (error) {
+    console.error('Delete image error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting image',
+      error: error.message
+    });
+  }
+};
+
 // Export all functions
 module.exports = {
   createProperty,
   getAllProperties,
   getPropertyById,
   updateProperty,
-  deleteProperty
+  deleteProperty,
+  uploadImages,
+  deleteImage
 };
