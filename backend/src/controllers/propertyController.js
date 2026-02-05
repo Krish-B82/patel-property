@@ -5,23 +5,38 @@ const cloudinary = require('../config/cloudinary');
 const createProperty = async (req, res) => {
   try {
     const {
+      code,
       title,
       description,
       min_price,
       max_price,
+      city,
       location,
       bedrooms,
       bathrooms,
       area_sqft,
       property_type,
+      instagram_video_url,
       status
     } = req.body;
 
-    // Validation
-    if (!title || !min_price || !max_price || !location || !bedrooms || !property_type) {
+    // Validation - code is now required
+    if (!code || !title || !min_price || !max_price || !location || !property_type) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields: title, min_price, max_price, location, bedrooms, property_type'
+        message: 'Please provide all required fields: code, title, min_price, max_price, location, property_type'
+      });
+    }
+
+    // Check if code already exists
+    const existingCode = await prisma.property.findUnique({
+      where: { code: code }
+    });
+
+    if (existingCode) {
+      return res.status(400).json({
+        success: false,
+        message: `Property code "${code}" already exists. Please use a unique code.`
       });
     }
 
@@ -33,18 +48,39 @@ const createProperty = async (req, res) => {
       });
     }
 
+    // Validate property_type
+    const validTypes = ['apartment', 'villa', 'house', 'plot', 'office'];
+    if (!validTypes.includes(property_type)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid property_type. Must be one of: ${validTypes.join(', ')}`
+      });
+    }
+
+    // For plot and office, bedrooms/bathrooms are not required
+    // For others, bedrooms is required
+    if (!['plot', 'office'].includes(property_type) && !bedrooms) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bedrooms is required for apartment, villa, and house types'
+      });
+    }
+
     // Create property
     const property = await prisma.property.create({
       data: {
+        code,
         title,
         description: description || null,
         min_price: parseInt(min_price),
         max_price: parseInt(max_price),
+        city: city || 'Vadodara',
         location,
-        bedrooms: parseInt(bedrooms),
+        bedrooms: bedrooms ? parseInt(bedrooms) : null,
         bathrooms: bathrooms ? parseInt(bathrooms) : null,
         area_sqft: area_sqft ? parseInt(area_sqft) : null,
         property_type,
+        instagram_video_url: instagram_video_url || null,
         status: status || 'available',
         images: []
       }
@@ -71,6 +107,22 @@ const getAllProperties = async (req, res) => {
   try {
     // Build filter object
     let filter = {};
+
+    // Code filter (for searching by property code)
+    if (req.query.code) {
+      filter.code = {
+        contains: req.query.code,
+        mode: 'insensitive'
+      };
+    }
+
+    // City filter
+    if (req.query.city) {
+      filter.city = {
+        contains: req.query.city,
+        mode: 'insensitive'
+      };
+    }
 
     // Location filter
     if (req.query.location) {
@@ -190,20 +242,54 @@ const getPropertyById = async (req, res) => {
   }
 };
 
+// Get property by code (useful for WhatsApp messages)
+const getPropertyByCode = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const property = await prisma.property.findUnique({
+      where: { code: code }
+    });
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: `Property with code "${code}" not found`
+      });
+    }
+
+    res.json({
+      success: true,
+      property: property
+    });
+
+  } catch (error) {
+    console.error('Get property by code error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching property',
+      error: error.message
+    });
+  }
+};
+
 // Update property (Admin only)
 const updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
     const {
+      code,
       title,
       description,
       min_price,
       max_price,
+      city,
       location,
       bedrooms,
       bathrooms,
       area_sqft,
       property_type,
+      instagram_video_url,
       status
     } = req.body;
 
@@ -219,6 +305,20 @@ const updateProperty = async (req, res) => {
       });
     }
 
+    // If updating code, check if new code already exists
+    if (code && code !== existingProperty.code) {
+      const codeExists = await prisma.property.findUnique({
+        where: { code: code }
+      });
+
+      if (codeExists) {
+        return res.status(400).json({
+          success: false,
+          message: `Property code "${code}" already exists. Please use a unique code.`
+        });
+      }
+    }
+
     // Validate price range if both are provided
     if (min_price && max_price && parseInt(min_price) > parseInt(max_price)) {
       return res.status(400).json({
@@ -229,15 +329,18 @@ const updateProperty = async (req, res) => {
 
     // Build update data object (only update fields that are provided)
     const updateData = {};
+    if (code) updateData.code = code;
     if (title) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (min_price) updateData.min_price = parseInt(min_price);
     if (max_price) updateData.max_price = parseInt(max_price);
+    if (city) updateData.city = city;
     if (location) updateData.location = location;
-    if (bedrooms) updateData.bedrooms = parseInt(bedrooms);
+    if (bedrooms !== undefined) updateData.bedrooms = bedrooms ? parseInt(bedrooms) : null;
     if (bathrooms !== undefined) updateData.bathrooms = bathrooms ? parseInt(bathrooms) : null;
     if (area_sqft !== undefined) updateData.area_sqft = area_sqft ? parseInt(area_sqft) : null;
     if (property_type) updateData.property_type = property_type;
+    if (instagram_video_url !== undefined) updateData.instagram_video_url = instagram_video_url;
     if (status) updateData.status = status;
 
     // Update property
@@ -445,6 +548,7 @@ module.exports = {
   createProperty,
   getAllProperties,
   getPropertyById,
+  getPropertyByCode,
   updateProperty,
   deleteProperty,
   uploadImages,

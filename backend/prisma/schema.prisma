@@ -17,24 +17,28 @@ model Admin {
 }
 
 model Property {
-  id            String   @id @default(uuid())
-  title         String
-  description   String?
-  min_price     Int
-  max_price     Int
-  location      String
-  bedrooms      Int
-  bathrooms     Int?
-  area_sqft     Int?
-  
-  property_type String
-  images        String[]
-  status        String   @default("available")
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  code                 String   @unique
+  title                String
+  description          String?
+  min_price            Int
+  max_price            Int
+  city                 String   @default("Vadodara")
+  location             String
+  bedrooms             Int?
+  bathrooms            Int?
+  area_sqft            Int?
+  property_type        String
+  instagram_video_url  String?
+  images               String[]
+  status               String   @default("available")
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
 
   @@index([location])
   @@index([min_price])
   @@index([max_price])
   @@index([property_type])
+  @@index([code])
+  @@index([city])
 }

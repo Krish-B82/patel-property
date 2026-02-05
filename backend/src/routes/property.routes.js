@@ -10,6 +10,7 @@ const {
     createProperty,
     getAllProperties,
     getPropertyById,
+    getPropertyByCode,
     updateProperty,
     deleteProperty,
     uploadImages,
@@ -20,6 +21,7 @@ const {
 // These are for regular users browsing the website
 router.get('/', getAllProperties);           // Get all properties with filters
 router.get('/:id', getPropertyById);         // Get single property details
+router.get('/code/:code', getPropertyByCode); // Get property by code (for WhatsApp links)
 
 // PROTECTED ROUTES (Authentication required - admin only)
 // These require JWT token in Authorization header
