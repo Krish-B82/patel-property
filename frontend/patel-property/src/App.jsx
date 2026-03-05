@@ -2,6 +2,9 @@ import { useState } from 'react';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import LanguageSelector from './components/language/LanguageSelector';
+import Hero from './components/home/Hero';
+import PropertyTypeCards from './components/home/PropertyTypeCards';
+import LatestProperties from './components/home/LatestProperties';
 
 function App() {
   const [showLanguageSelector, setShowLanguageSelector] = useState(true);
@@ -19,20 +22,17 @@ function App() {
 
   // Main app after language selection
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-white">
       <Header />
       
-      <main className="py-20 px-6 text-center">
-        <h1 className="text-5xl font-bold text-black mb-4">
-          Day 2 Components Working! ✅
-        </h1>
-        <p className="text-gray-700 text-xl">
-          Language: {selectedLanguage.toUpperCase()}
-        </p>
-        <p className="text-gray-600 mt-4">
-          Header and Footer are complete. Next: Hero section!
-        </p>
-      </main>
+      {/* Hero Section */}
+      <Hero />
+
+      {/* Property Type Cards */}
+      <PropertyTypeCards />
+
+      {/* Latest Properties - THIS FETCHES FROM BACKEND! */}
+      <LatestProperties />
 
       <Footer />
     </div>
