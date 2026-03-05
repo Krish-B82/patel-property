@@ -1,58 +1,61 @@
-import { Home, Building2, Flag } from 'lucide-react';
+import { Home, Building2, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../utils/translations';
 
 const PropertyTypeCards = () => {
+    const navigate = useNavigate();
+    const t = useTranslation();
+
     const propertyTypes = [
         {
-            id: 1,
-            title: 'Residential',
             icon: Home,
-            type: 'residential',
+            title: t('residential'),
+            type: 'Residential',
         },
         {
-            id: 2,
-            title: 'Commercial',
             icon: Building2,
-            type: 'commercial',
+            title: t('commercial'),
+            type: 'Commercial',
         },
         {
-            id: 3,
-            title: 'Plots',
-            icon: Flag,
-            type: 'plot',
+            icon: MapPin,
+            title: t('plots'),
+            type: 'Plots',
         },
     ];
 
-    const handleCardClick = (type) => {
-        // TODO: Navigate to search page with type filter
-        console.log('Selected type:', type);
+    const handleTypeClick = (type) => {
+        navigate(`/search?type=${type}`);
     };
 
     return (
-        <section className="py-10 sm:py-16 px-4 sm:px-6 bg-white">
-            <div className="max-w-7xl mx-auto">
-                <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-8 text-center sm:text-left">
-                    Find your property type
+        <div className="py-12 sm:py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">
+                    {t('findPropertyType')}
                 </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                    {propertyTypes.map((item) => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {propertyTypes.map((item, index) => {
                         const Icon = item.icon;
                         return (
-                            <button
-                                key={item.id}
-                                onClick={() => handleCardClick(item.type)}
-                                className="group p-6 sm:p-8 border-2 border-gray-200 rounded-xl sm:rounded-2xl hover:border-blue-500 hover:shadow-lg transition-all duration-200 bg-white"
+                            <div
+                                key={index}
+                                onClick={() => handleTypeClick(item.type)}
+                                className="bg-white border-2 border-gray-200 rounded-xl p-8 text-center hover:border-primary hover:shadow-lg transition cursor-pointer group"
                             >
-                                <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-blue-500 mb-3 sm:mb-4 mx-auto group-hover:scale-110 transition-transform" />
-                                <h3 className="text-lg sm:text-xl font-semibold text-black">
+                                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-blue-50 rounded-full mb-4 group-hover:bg-primary group-hover:scale-110 transition">
+                                    <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 group-hover:text-black" />
+                                </div>
+                                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">
                                     {item.title}
                                 </h3>
-                            </button>
+                            </div>
                         );
                     })}
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

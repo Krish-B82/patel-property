@@ -1,3 +1,5 @@
+import { getInstagramLink } from '../../utils/constants';
+
 const Footer = () => {
     return (
         <footer className="bg-primary py-10 sm:py-12 px-4 sm:px-6">
@@ -12,13 +14,40 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {/* Social Icons */}
+                    {/* Social Icons - NOW WITH INSTAGRAM LINK! */}
                     <div className="flex gap-2.5 sm:gap-3 mt-6">
-                        {['X', 'IG', 'YT', 'LI'].map((social) => (
-                            <button key={social} className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-base bg-yellow-600 hover:bg-yellow-700 rounded-full flex items-center justify-center text-white font-bold transition">
-                                {social}
-                            </button>
-                        ))}
+                        <a
+                            href="https://twitter.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-base bg-yellow-600 hover:bg-yellow-700 rounded-full flex items-center justify-center text-white font-bold transition"
+                        >
+                            X
+                        </a>
+                        <a
+                            href={getInstagramLink()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-base bg-yellow-600 hover:bg-yellow-700 rounded-full flex items-center justify-center text-white font-bold transition"
+                        >
+                            IG
+                        </a>
+                        <a
+                            href="https://youtube.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-base bg-yellow-600 hover:bg-yellow-700 rounded-full flex items-center justify-center text-white font-bold transition"
+                        >
+                            YT
+                        </a>
+                        <a
+                            href="https://linkedin.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-base bg-yellow-600 hover:bg-yellow-700 rounded-full flex items-center justify-center text-white font-bold transition"
+                        >
+                            LI
+                        </a>
                     </div>
                 </div>
 
@@ -26,7 +55,14 @@ const Footer = () => {
                 <div>
                     <h3 className="text-lg sm:text-xl font-bold text-black mb-3 sm:mb-4">Contact Us</h3>
                     <div className="space-y-2 text-gray-800">
-                        <p>@patel_property_vadodara</p>
+
+                        <a href={getInstagramLink()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block hover:text-black transition"
+                        >
+                            @patel_property_vadodara
+                        </a>
                         <p>+91 XXXXXX214</p>
                     </div>
                 </div>
@@ -35,7 +71,7 @@ const Footer = () => {
                 <div>
                     <h3 className="text-lg sm:text-xl font-bold text-black mb-3 sm:mb-4">Pages</h3>
                     <div className="space-y-2">
-                        <a href="#" className="block text-gray-800 hover:text-black underline">Latest Property</a>
+                        <a href="/" className="block text-gray-800 hover:text-black underline">Latest Property</a>
                         <a href="#" className="block text-gray-800 hover:text-black underline">About Us</a>
                         <a href="#" className="block text-gray-800 hover:text-black underline">Contact Us</a>
                         <a href="#" className="block text-gray-800 hover:text-black underline">Privacy Policy</a>

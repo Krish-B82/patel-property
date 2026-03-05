@@ -45,3 +45,6 @@ export const getPropertyByCode = async (code) => {
 export const getLatestProperties = async () => {
   return await apiCall('/properties?limit=6&page=1');
 };
+export const getPopularAreas = async () => {
+  return await apiCall('/properties/popular-areas');
+};

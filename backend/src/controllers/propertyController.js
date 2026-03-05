@@ -543,6 +543,49 @@ const deleteImage = async (req, res) => {
   }
 };
 
+// ... all your existing functions above ...
+
+// Get popular areas with real stats
+// Get popular areas with real stats
+const getPopularAreas = async (req, res) => {
+  try {
+    const properties = await prisma.property.findMany({
+      select: {
+        location: true,
+        min_price: true,
+        max_price: true
+      }
+    });
+
+    const areaStats = {};
+    
+    properties.forEach(property => {
+      const area = property.location;
+      if (!areaStats[area]) {
+        areaStats[area] = {
+          name: area,
+          count: 0,
+          minPrice: Infinity,
+          maxPrice: 0
+        };
+      }
+      
+      areaStats[area].count += 1;
+      areaStats[area].minPrice = Math.min(areaStats[area].minPrice, property.min_price);
+      areaStats[area].maxPrice = Math.max(areaStats[area].maxPrice, property.max_price);
+    });
+
+    const popularAreas = Object.values(areaStats)
+      .filter(area => area.count >= 1)  // 🆕 CHANGED: At least 1 property
+      .sort((a, b) => b.count - a.count)  // Sort by count (highest first)
+      .slice(0, 6);  // 🆕 Top 6 areas only
+
+    res.json({ success: true, areas: popularAreas });
+  } catch (error) {
+    console.error('Error fetching popular areas:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
 // Export all functions
 module.exports = {
   createProperty,
@@ -552,5 +595,6 @@ module.exports = {
   updateProperty,
   deleteProperty,
   uploadImages,
-  deleteImage
+  deleteImage,
+  getPopularAreas  // 🆕 ADD THIS
 };
