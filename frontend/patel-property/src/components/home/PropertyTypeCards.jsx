@@ -8,19 +8,29 @@ const PropertyTypeCards = () => {
 
     const propertyTypes = [
         {
-            icon: Home,
-            title: t('residential'),
-            type: 'Residential',
+            icon: Building2,
+            title: t('apartment'),
+            type: 'apartment',
         },
         {
-            icon: Building2,
-            title: t('commercial'),
-            type: 'Commercial',
+            icon: Home,
+            title: t('villa'),
+            type: 'villa',
+        },
+        {
+            icon: Home,
+            title: t('house'),
+            type: 'house',
         },
         {
             icon: MapPin,
-            title: t('plots'),
-            type: 'Plots',
+            title: t('plot'),
+            type: 'plot',
+        },
+        {
+            icon: Building2,
+            title: t('office'),
+            type: 'office',
         },
     ];
 

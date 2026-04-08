@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Maximize, Home, Share2 } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { formatPrice, getWhatsAppLink } from '../../utils/constants';
 
 const PropertyCard = ({ property }) => {
@@ -99,9 +100,9 @@ const PropertyCard = ({ property }) => {
         <div className="flex gap-2 sm:gap-3">
           <button
             onClick={handleWhatsApp}
-            className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center font-bold transition"
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center transition"
           >
-            W
+            <FaWhatsapp className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           <button

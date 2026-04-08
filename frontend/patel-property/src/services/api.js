@@ -3,9 +3,19 @@ import { API_BASE_URL } from '../utils/constants';
 // Generic API call function
 const apiCall = async (endpoint, options = {}) => {
   try {
+    const token = localStorage.getItem('adminToken');
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
+      headers,
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || 'API Error');
@@ -47,4 +57,11 @@ export const getLatestProperties = async () => {
 };
 export const getPopularAreas = async () => {
   return await apiCall('/properties/popular-areas');
+};
+
+// Admin: Delete property
+export const deleteProperty = async (id) => {
+  return await apiCall(`/properties/${id}`, {
+    method: 'DELETE',
+  });
 };

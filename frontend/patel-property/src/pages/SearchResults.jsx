@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import BackToHomeButton from '../components/common/BackToHomeButton';
 import { getAllProperties } from '../services/api';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -72,8 +73,8 @@ const SearchResults = () => {
   return (
     <div className="min-h-screen bg-secondary">
       <Header />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <BackToHomeButton />
         <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2">
           Search Results
         </h1>

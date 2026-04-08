@@ -60,8 +60,9 @@ const PropertyFilters = ({ filters, onFilterChange }) => {
             type="text"
             value={filters.location || ''}
             onChange={(e) => handleChange('location', e.target.value)}
-            placeholder="Area name"
+            placeholder="Area name (e.g. Sama, Karelibaug)"
             className="w-full p-2.5 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none text-sm"
+            autoFocus={!!filters.location}
           />
         </div>
 

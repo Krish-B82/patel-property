@@ -1,5 +1,7 @@
 const prisma = require('../config/database');
-const cloudinary = require('../config/cloudinary');
+const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const r2Client = require('../config/r2');
+const sharp = require('sharp');
 
 // Create new property (Admin only)
 const createProperty = async (req, res) => {
@@ -160,11 +162,9 @@ const getAllProperties = async (req, res) => {
       };
     }
 
-    // Status filter (default: only show available)
+    // Status filter (only if provided)
     if (req.query.status) {
       filter.status = req.query.status;
-    } else {
-      filter.status = 'available';
     }
 
     // Pagination
@@ -427,28 +427,47 @@ const uploadImages = async (req, res) => {
       });
     }
 
-    // Check total images limit (max 6)
+    // Check total images limit (max 4)
     const totalImages = property.images.length + req.files.length;
-    if (totalImages > 6) {
+    if (totalImages > 4) {
       return res.status(400).json({
         success: false,
-        message: `Too many images. Current: ${property.images.length}, uploading: ${req.files.length}, max allowed: 6`
+        message: `Too many images. Current: ${property.images.length}, uploading: ${req.files.length}, max allowed: 4`
       });
     }
 
-    // Upload each image to Cloudinary
+    // Upload each image to Cloudflare R2
     const uploadedUrls = [];
     for (const file of req.files) {
-      const base64 = file.buffer.toString('base64');
-      const dataURI = `data:${file.mimetype};base64,${base64}`;
+      // Process image with Sharp
+      // - Max width 1920px (prevents 4K/8K massive images), keeps aspect ratio
+      // - Converts to webp with 80% quality (excellent quality, tiny file size)
+      const processedBuffer = await sharp(file.buffer)
+        .resize({ width: 1920, withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
 
-      const result = await cloudinary.uploader.upload(dataURI, {
-        folder: 'patel-property',
-        quality: 'auto',
-        fetch_format: 'auto'
-      });
+      // Create a unique filename (.webp)
+      const fileName = `property-${Date.now()}-${Math.round(Math.random() * 1E9)}.webp`;
+      const fileKey = `patel-property/${fileName}`;
+      
+      const uploadParams = {
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: fileKey,
+        Body: processedBuffer,
+        ContentType: 'image/webp',
+        CacheControl: 'public, max-age=31536000, immutable', // Cache for 1 year
+      };
 
-      uploadedUrls.push(result.secure_url);
+      await r2Client.send(new PutObjectCommand(uploadParams));
+
+      // Construct the public URL
+      const publicDomain = process.env.R2_PUBLIC_URL.endsWith('/') 
+        ? process.env.R2_PUBLIC_URL.slice(0, -1) 
+        : process.env.R2_PUBLIC_URL;
+      const publicUrl = `${publicDomain}/${fileKey}`;
+      
+      uploadedUrls.push(publicUrl);
     }
 
     // Add new URLs to existing images array
@@ -507,15 +526,23 @@ const deleteImage = async (req, res) => {
     // Get image URL to delete
     const imageUrl = property.images[index];
 
-    // Extract public_id from Cloudinary URL
-    // URL format: https://res.cloudinary.com/cloud_name/image/upload/v123/folder/public_id.ext
-    const parts = imageUrl.split('/');
-    const publicIdWithExt = parts[parts.length - 1];
-    const folder = parts[parts.length - 2];
-    const publicId = `${folder}/${publicIdWithExt.split('.')[0]}`;
+    // Delete from Cloudflare R2 (or skip if old Cloudinary URL)
+    const baseUrl = process.env.R2_PUBLIC_URL.endsWith('/') 
+      ? process.env.R2_PUBLIC_URL.slice(0, -1) 
+      : process.env.R2_PUBLIC_URL;
 
-    // Delete from Cloudinary
-    await cloudinary.uploader.destroy(publicId);
+    if (imageUrl.startsWith(baseUrl)) {
+      // Extract key by removing the base URL part
+      const keyToDelete = imageUrl.substring(baseUrl.length + 1);
+      
+      await r2Client.send(new DeleteObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: keyToDelete
+      }));
+    } else if (imageUrl.includes('res.cloudinary.com')) {
+      // Gracefully handle old Cloudinary images (we can't delete them easily without Cloudinary SDK, so we just remove from DB)
+      console.log('Skipping deletion of old Cloudinary image from R2 bucket');
+    }
 
     // Remove from array
     const updatedImages = property.images.filter((_, i) => i !== index);
@@ -558,7 +585,7 @@ const getPopularAreas = async (req, res) => {
     });
 
     const areaStats = {};
-    
+
     properties.forEach(property => {
       const area = property.location;
       if (!areaStats[area]) {
@@ -569,7 +596,7 @@ const getPopularAreas = async (req, res) => {
           maxPrice: 0
         };
       }
-      
+
       areaStats[area].count += 1;
       areaStats[area].minPrice = Math.min(areaStats[area].minPrice, property.min_price);
       areaStats[area].maxPrice = Math.max(areaStats[area].maxPrice, property.max_price);

@@ -7,7 +7,7 @@ const PropertyGallery = ({ images }) => {
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full h-96 bg-gray-200 rounded-xl flex items-center justify-center">
+      <div className="w-full h-[480px] bg-gray-200 rounded-xl flex items-center justify-center">
         <p className="text-gray-500">No images available</p>
       </div>
     );
@@ -27,7 +27,7 @@ const PropertyGallery = ({ images }) => {
       <div className="relative">
         {/* Main Image */}
         <div
-          className="w-full h-96 bg-gray-200 rounded-xl overflow-hidden cursor-pointer"
+          className="w-full h-[480px] bg-gray-200 rounded-xl overflow-hidden cursor-pointer"
           onClick={() => setShowLightbox(true)}
         >
           <img
@@ -68,7 +68,7 @@ const PropertyGallery = ({ images }) => {
             <div
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`h-20 bg-gray-200 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
+              className={`h-24 bg-gray-200 rounded-lg overflow-hidden cursor-pointer border-2 transition ${
                 currentIndex === index ? 'border-primary' : 'border-transparent hover:border-gray-300'
               }`}
             >

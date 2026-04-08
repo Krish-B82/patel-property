@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getWhatsAppLink } from '../../utils/constants';
 import { useTranslation } from '../../utils/translations';
+import logo from '../../assets/patel.svg';
 
 const Header = () => {
     const [selectedLang, setSelectedLang] = useState('EN');
@@ -24,9 +25,9 @@ const Header = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gray-200 rounded-full flex-shrink-0"></div>
+                        <img src={logo} alt="Patel Property" className="w-10 h-10 sm:w-14 sm:h-14 object-cover flex-shrink-0" />
                         <div>
-                            <h1 className="text-xl sm:text-2xl font-bold text-black leading-none mb-1">PATELPROPERTY.com</h1>
+                            <h1 className="text-xl sm:text-2xl font-bold text-black leading-none mb-1">PATELPROPERTY</h1>
                             <p className="text-xs sm:text-sm text-gray-800">Vadodara, Gujarat</p>
                         </div>
                     </div>

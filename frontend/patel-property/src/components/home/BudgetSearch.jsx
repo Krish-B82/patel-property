@@ -7,6 +7,7 @@ const BudgetSearch = () => {
     const [selectedBudget, setSelectedBudget] = useState('');
     const [customMin, setCustomMin] = useState('');
     const [customMax, setCustomMax] = useState('');
+    const [location, setLocation] = useState('');
     const navigate = useNavigate();
     const t = useTranslation();
 
@@ -24,15 +25,17 @@ const BudgetSearch = () => {
         const params = new URLSearchParams();
         params.set('minPrice', budget.min);
         if (budget.max) params.set('maxPrice', budget.max);
+        if (location) params.set('location', location);
         navigate(`/search?${params.toString()}`);
     };
 
     const handleCustomSearch = (e) => {
         e.preventDefault();
-        if (customMin || customMax) {
+        if (customMin || customMax || location) {
             const params = new URLSearchParams();
             if (customMin) params.set('minPrice', customMin);
             if (customMax) params.set('maxPrice', customMax);
+            if (location) params.set('location', location);
             navigate(`/search?${params.toString()}`);
         }
     };
@@ -49,6 +52,16 @@ const BudgetSearch = () => {
                     </p>
                 </div>
 
+                <div className="mb-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center">
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={e => setLocation(e.target.value)}
+                        placeholder="Search by location (e.g. Sama, Karelibaug)"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
+                        style={{ minWidth: 180 }}
+                    />
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
                     {budgetRanges.map((budget, index) => (
                         <button
