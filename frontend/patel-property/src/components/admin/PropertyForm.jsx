@@ -174,7 +174,7 @@ const PropertyForm = ({ initialData, isEditing }) => {
         } catch (err) {
             console.error('Save error:', err);
             // Support both standard axios errors and our custom thrown errors
-            setError(err.message || err.response?.data?.message || 'Failed to save property. Please try again.');
+            setError(err.response?.data?.message || err.message || 'Failed to save property. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -310,12 +310,13 @@ const PropertyForm = ({ initialData, isEditing }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Max Price (₹) (Optional)</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Max Price (₹) *</label>
                             <input
                                 type="number"
                                 name="max_price"
                                 value={formData.max_price}
                                 onChange={handleChange}
+                                required
                                 min="0"
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
                             />
@@ -341,12 +342,13 @@ const PropertyForm = ({ initialData, isEditing }) => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Bedrooms</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Bedrooms *</label>
                                 <input
                                     type="number"
                                     name="bedrooms"
                                     value={formData.bedrooms}
                                     onChange={handleChange}
+                                    required={!['plot', 'office'].includes(formData.property_type)}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
                                 />
                             </div>
