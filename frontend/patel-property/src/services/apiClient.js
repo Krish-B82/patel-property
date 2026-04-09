@@ -3,7 +3,8 @@ import axios from 'axios';
 // Get base URLs from environment variables or use placeholders
 export const RAILWAY_URL = import.meta.env.VITE_RAILWAY_URL || 'https://patelproperty-production.up.railway.app/api';
 export const RENDER_URL = import.meta.env.VITE_RENDER_URL || 'https://patelproperty.onrender.com/api';
-export const LOCAL_URL = 'http://localhost:5000/api';
+// Connect laptop directly to live backend so you don't have to run localhost:5000 anymore!
+export const LOCAL_URL = 'https://patelproperty-production.up.railway.app/api';
 
 const isDev = import.meta.env.DEV;
 export const PRIMARY_URL = isDev ? LOCAL_URL : RAILWAY_URL;

@@ -89,7 +89,8 @@ const PropertyForm = ({ initialData, isEditing }) => {
             setExistingImages(prev => prev.filter((_, i) => i !== imageIndex));
         } catch (err) {
             console.error('Error deleting image:', err);
-            alert('Failed to delete image');
+            const errorMsg = err.response?.data?.message || err.message || 'Unknown network error';
+            alert(`Failed to delete image: ${errorMsg}`);
         }
     };
 
