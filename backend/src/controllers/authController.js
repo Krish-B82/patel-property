@@ -94,11 +94,11 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Generate JWT token (expires in 7 days)
+    // Generate JWT token (expires in 7 hours)
     const token = jwt.sign(
       { id: admin.id, email: admin.email },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '7h' }
     );
 
     res.json({
