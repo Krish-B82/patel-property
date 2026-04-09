@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { API_BASE_URL } from '../../utils/constants';
+import { axiosWithFallback } from '../../services/apiClient';
 import { Upload, X, MapPin } from 'lucide-react';
 
 const PROPERTY_TYPES = ['apartment', 'villa', 'house', 'plot', 'office'];
@@ -82,7 +81,7 @@ const PropertyForm = ({ initialData, isEditing }) => {
 
         try {
             const token = localStorage.getItem('adminToken');
-            await axios.delete(`${API_BASE_URL}/properties/${initialData.id}/images/${imageIndex}`, {
+            await axiosWithFallback('delete', `/properties/${initialData.id}/images/${imageIndex}`, null, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -122,9 +121,9 @@ const PropertyForm = ({ initialData, isEditing }) => {
 
             // 1. Create or Update Property Data
             if (isEditing) {
-                await axios.put(`${API_BASE_URL}/properties/${propertyId}`, dataToSubmit, config);
+                await axiosWithFallback('put', `/properties/${propertyId}`, dataToSubmit, config);
             } else {
-                const response = await axios.post(`${API_BASE_URL}/properties`, dataToSubmit, config);
+                const response = await axiosWithFallback('post', `/properties`, dataToSubmit, config);
                 propertyId = response.data.property.id;
             }
 
@@ -136,8 +135,8 @@ const PropertyForm = ({ initialData, isEditing }) => {
                         formDataObj.append('images', image);
                     });
 
-                    await axios.post(
-                        `${API_BASE_URL}/properties/${propertyId}/images`,
+                    await axiosWithFallback('post',
+                        `/properties/${propertyId}/images`,
                         formDataObj,
                         {
                             headers: {
@@ -155,7 +154,7 @@ const PropertyForm = ({ initialData, isEditing }) => {
                     // If image upload fails, we MUST rollback the property creation
                     if (!isEditing) {
                         try {
-                            await axios.delete(`${API_BASE_URL}/properties/${propertyId}`, {
+                            await axiosWithFallback('delete', `/properties/${propertyId}`, null, {
                                 headers: { Authorization: `Bearer ${token}` }
                             });
                             console.log('Rolled back property creation due to image upload failure.');

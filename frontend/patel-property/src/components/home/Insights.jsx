@@ -24,7 +24,7 @@ const Insights = () => {
               onClick={() => setSelectedInsight(insight)}
               className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-1"
             >
-              <div className="text-4xl mb-4">{insight.icon}</div>
+              {/* Icon removed as per request */}
               <h3 className="text-lg font-bold text-black mb-2">{insight.title}</h3>
               <p className="text-gray-600 text-sm">{insight.description}</p>
               <button className="mt-4 text-blue-600 hover:text-blue-700 font-semibold text-sm flex items-center gap-1">

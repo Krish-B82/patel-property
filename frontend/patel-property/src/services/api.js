@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../utils/constants';
+import { fetchWithFallback } from './apiClient';
 
 // Generic API call function
 const apiCall = async (endpoint, options = {}) => {
@@ -13,7 +13,7 @@ const apiCall = async (endpoint, options = {}) => {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetchWithFallback(endpoint, {
       ...options,
       headers,
     });
