@@ -417,8 +417,8 @@ const PropertyForm = ({ initialData, isEditing }) => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                         {/* Existing Images */}
                         {existingImages.map((img, idx) => (
-                            <div key={img.id} className="relative group rounded-lg overflow-hidden border border-gray-200">
-                                <img src={img.url} alt={`Property ${idx}`} className="w-full h-32 object-cover" />
+                            <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                                <img src={typeof img === 'string' ? img : img.url} alt={`Property ${idx}`} className="w-full h-32 object-cover" />
                                 <button
                                     type="button"
                                     onClick={() => deleteExistingImage(idx)}

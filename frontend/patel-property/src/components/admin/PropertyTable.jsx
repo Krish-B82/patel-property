@@ -32,7 +32,7 @@ const PropertyTable = ({ properties, onDelete }) => {
                                     <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                                         {property.images && property.images.length > 0 ? (
                                             <img
-                                                src={property.images[0].url}
+                                                src={typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url}
                                                 alt={property.title}
                                                 className="w-full h-full object-cover"
                                             />

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Get base URLs from environment variables or use placeholders
-export const RAILWAY_URL = import.meta.env.VITE_RAILWAY_URL || 'https://your-railway-app.up.railway.app/api';
-export const RENDER_URL = import.meta.env.VITE_RENDER_URL || 'https://your-render-app.onrender.com/api';
+export const RAILWAY_URL = import.meta.env.VITE_RAILWAY_URL || 'https://patelproperty-production.up.railway.app/api';
+export const RENDER_URL = import.meta.env.VITE_RENDER_URL || 'https://patelproperty.onrender.com/api';
 export const LOCAL_URL = 'http://localhost:5000/api';
 
 const isDev = import.meta.env.DEV;
