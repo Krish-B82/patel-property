@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getAllProperties, deleteProperty } from '../../services/api';
-import { Home, Building2, MapPin, Search } from 'lucide-react';
+import { Home, Building2, MapPin, Search, Download } from 'lucide-react';
 import PropertyTable from '../../components/admin/PropertyTable';
 import Pagination from '../../components/property/Pagination';
+import * as XLSX from 'xlsx';
 
 const AdminDashboard = () => {
     const [properties, setProperties] = useState([]);
@@ -70,6 +71,46 @@ const AdminDashboard = () => {
         }
     };
 
+    // Derived state for pagination and filtering
+    const filteredProperties = properties.filter(p => 
+        p.code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
+    const paginatedProperties = filteredProperties.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE, 
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    const handleExportExcel = () => {
+        if (filteredProperties.length === 0) {
+            alert("No properties to export!");
+            return;
+        }
+
+        const dataToExport = filteredProperties.map(p => ({
+            'Code': p.code,
+            'Title': p.title,
+            'Type': p.property_type,
+            'City': p.city,
+            'Location': p.location,
+            'Min Price': p.min_price,
+            'Max Price': p.max_price,
+            'Area (sqft)': p.area_sqft || 'N/A',
+            'Bedrooms': p.bedrooms || 'N/A',
+            'Bathrooms': p.bathrooms || 'N/A',
+            'Status': p.status,
+            'Owner Name': p.owner_name || 'N/A',
+            'Owner Contact': p.owner_contact || 'N/A',
+            'Owner Address': p.owner_address || 'N/A',
+            'Original Deal (₹)': p.original_amount || 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Properties");
+        XLSX.writeFile(workbook, "Patel_Properties_Data.xlsx");
+    };
+
     return (
         <AdminLayout>
             <div>
@@ -127,30 +168,28 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Compute filter & pagination */}
-                {(() => {
-                    const filteredProperties = properties.filter(p => 
-                        p.code.toLowerCase().includes(searchTerm.toLowerCase())
-                    );
-                    const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
-                    const paginatedProperties = filteredProperties.slice(
-                        (currentPage - 1) * ITEMS_PER_PAGE, 
-                        currentPage * ITEMS_PER_PAGE
-                    );
-
-                    return (
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                                <h2 className="text-xl font-bold">All Properties ({filteredProperties.length})</h2>
+                <div className="bg-white rounded-xl shadow-md p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 className="text-xl font-bold">All Properties ({filteredProperties.length})</h2>
                         
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search by Property Code..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-                            />
+                        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <div className="relative w-full sm:w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by Property Code..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                                />
+                            </div>
+                            <button 
+                                onClick={handleExportExcel}
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold whitespace-nowrap"
+                            >
+                                <Download className="w-5 h-5" />
+                                Export Excel
+                            </button>
                         </div>
                     </div>
                     
@@ -170,8 +209,6 @@ const AdminDashboard = () => {
                         </div>
                     )}
                 </div>
-            );
-        })()}
             </div>
         </AdminLayout>
     );
