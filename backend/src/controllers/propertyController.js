@@ -19,7 +19,11 @@ const createProperty = async (req, res) => {
       area_sqft,
       property_type,
       instagram_video_url,
-      status
+      status,
+      owner_name,
+      owner_contact,
+      owner_address,
+      original_amount
     } = req.body;
 
     // Validation - code is now required
@@ -84,7 +88,11 @@ const createProperty = async (req, res) => {
         property_type,
         instagram_video_url: instagram_video_url || null,
         status: status || 'available',
-        images: []
+        images: [],
+        owner_name: owner_name || null,
+        owner_contact: owner_contact || null,
+        owner_address: owner_address || null,
+        original_amount: original_amount ? parseInt(original_amount) : null
       }
     });
 
@@ -177,6 +185,31 @@ const getAllProperties = async (req, res) => {
       where: filter
     });
 
+    // Determine fields to expose based on whether the user is an admin
+    let selectFields = undefined; // Returns everything by default
+    
+    if (!req.admin) {
+      selectFields = {
+        id: true,
+        code: true,
+        title: true,
+        description: true,
+        min_price: true,
+        max_price: true,
+        city: true,
+        location: true,
+        bedrooms: true,
+        bathrooms: true,
+        area_sqft: true,
+        property_type: true,
+        instagram_video_url: true,
+        images: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+      };
+    }
+
     // Get properties
     const properties = await prisma.property.findMany({
       where: filter,
@@ -184,7 +217,8 @@ const getAllProperties = async (req, res) => {
       take: limit,
       orderBy: {
         created_at: 'desc'
-      }
+      },
+      select: selectFields
     });
 
     // Calculate total pages
@@ -216,8 +250,17 @@ const getPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Determine fields to expose based on whether the user is an admin
+    let selectFields = undefined;
+    if (!req.admin) {
+      selectFields = {
+        id: true, code: true, title: true, description: true, min_price: true, max_price: true, city: true, location: true, bedrooms: true, bathrooms: true, area_sqft: true, property_type: true, instagram_video_url: true, images: true, status: true, created_at: true, updated_at: true,
+      };
+    }
+
     const property = await prisma.property.findUnique({
-      where: { id: id }
+      where: { id: id },
+      select: selectFields
     });
 
     if (!property) {
@@ -247,8 +290,17 @@ const getPropertyByCode = async (req, res) => {
   try {
     const { code } = req.params;
 
+    // Determine fields to expose based on whether the user is an admin
+    let selectFields = undefined;
+    if (!req.admin) {
+      selectFields = {
+        id: true, code: true, title: true, description: true, min_price: true, max_price: true, city: true, location: true, bedrooms: true, bathrooms: true, area_sqft: true, property_type: true, instagram_video_url: true, images: true, status: true, created_at: true, updated_at: true,
+      };
+    }
+
     const property = await prisma.property.findUnique({
-      where: { code: code }
+      where: { code: code },
+      select: selectFields
     });
 
     if (!property) {
@@ -290,7 +342,11 @@ const updateProperty = async (req, res) => {
       area_sqft,
       property_type,
       instagram_video_url,
-      status
+      status,
+      owner_name,
+      owner_contact,
+      owner_address,
+      original_amount
     } = req.body;
 
     // Check if property exists
@@ -342,6 +398,10 @@ const updateProperty = async (req, res) => {
     if (property_type) updateData.property_type = property_type;
     if (instagram_video_url !== undefined) updateData.instagram_video_url = instagram_video_url;
     if (status) updateData.status = status;
+    if (owner_name !== undefined) updateData.owner_name = owner_name;
+    if (owner_contact !== undefined) updateData.owner_contact = owner_contact;
+    if (owner_address !== undefined) updateData.owner_address = owner_address;
+    if (original_amount !== undefined) updateData.original_amount = original_amount ? parseInt(original_amount) : null;
 
     // Update property
     const updatedProperty = await prisma.property.update({

@@ -25,6 +25,10 @@ const PropertyForm = ({ initialData, isEditing }) => {
         bathrooms: '',
         status: 'available',
         instagram_video_url: '',
+        owner_name: '',
+        owner_contact: '',
+        owner_address: '',
+        original_amount: '',
     });
 
     const [images, setImages] = useState([]);
@@ -46,6 +50,10 @@ const PropertyForm = ({ initialData, isEditing }) => {
                 bathrooms: initialData.bathrooms || '',
                 status: initialData.status || 'available',
                 instagram_video_url: initialData.instagram_video_url || '',
+                owner_name: initialData.owner_name || '',
+                owner_contact: initialData.owner_contact || '',
+                owner_address: initialData.owner_address || '',
+                original_amount: initialData.original_amount || '',
             });
             if (initialData.images) {
                 setExistingImages(initialData.images);
@@ -96,6 +104,14 @@ const PropertyForm = ({ initialData, isEditing }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Enforce at least 1 image
+        if (existingImages.length === 0 && images.length === 0) {
+            setError('Please upload at least 1 image for this property.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setLoading(true);
         setError('');
 
@@ -116,6 +132,10 @@ const PropertyForm = ({ initialData, isEditing }) => {
                 area_sqft: formData.area_sqft ? Number(formData.area_sqft) : null,
                 bedrooms: formData.bedrooms ? Number(formData.bedrooms) : null,
                 bathrooms: formData.bathrooms ? Number(formData.bathrooms) : null,
+                owner_name: formData.owner_name,
+                owner_contact: formData.owner_contact,
+                owner_address: formData.owner_address,
+                original_amount: formData.original_amount ? Number(formData.original_amount) : null,
             };
 
             let propertyId = initialData?.id;
@@ -143,7 +163,8 @@ const PropertyForm = ({ initialData, isEditing }) => {
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'multipart/form-data'
-                            }
+                            },
+                            timeout: 60000 // Image uploads can take a while for 4 files
                         }
                     );
                 } catch (uploadErr) {
@@ -383,6 +404,61 @@ const PropertyForm = ({ initialData, isEditing }) => {
                             onChange={handleChange}
                             placeholder="https://instagram.com/reel/..."
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                        />
+                    </div>
+                </div>
+
+                {/* Confidential Admin Info */}
+                <div className="space-y-4 bg-red-50 p-6 rounded-xl border border-red-200">
+                    <h2 className="text-xl font-bold text-red-800 border-b border-red-200 pb-2">Confidential Owner Details (Admin Only)</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-red-900 mb-1">Owner Name</label>
+                            <input
+                                type="text"
+                                name="owner_name"
+                                value={formData.owner_name}
+                                onChange={handleChange}
+                                placeholder="e.g., Rajesh Patel"
+                                className="w-full p-3 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-red-900 mb-1">Owner Contact Number</label>
+                            <input
+                                type="text"
+                                name="owner_contact"
+                                value={formData.owner_contact}
+                                onChange={handleChange}
+                                placeholder="e.g., +91 9876543210"
+                                className="w-full p-3 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-semibold text-red-900 mb-1">Owner Address</label>
+                        <textarea
+                            name="owner_address"
+                            value={formData.owner_address}
+                            onChange={handleChange}
+                            rows="2"
+                            placeholder="Full Address..."
+                            className="w-full p-3 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-semibold text-red-900 mb-1">Original Deal Amount (₹)</label>
+                        <input
+                            type="number"
+                            name="original_amount"
+                            value={formData.original_amount}
+                            min="0"
+                            onChange={handleChange}
+                            placeholder="e.g., 5000000"
+                            className="w-full p-3 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
                         />
                     </div>
                 </div>

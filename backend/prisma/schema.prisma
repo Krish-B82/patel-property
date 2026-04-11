@@ -32,6 +32,13 @@ model Property {
   instagram_video_url  String?
   images               String[]
   status               String   @default("available")
+  
+  // Secret Admin Fields
+  owner_name           String?
+  owner_contact        String?
+  owner_address        String?
+  original_amount      Int?
+  
   created_at           DateTime @default(now())
   updated_at           DateTime @updatedAt
 

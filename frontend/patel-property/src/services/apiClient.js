@@ -20,13 +20,13 @@ export const axiosWithFallback = async (method, endpoint, data = null, config = 
   }
 
   try {
-    // 1. Try Primary with 5-second timeout
+    // 1. Try Primary with 15-second timeout unless overridden
     const response = await axios({
       method,
       url: `${PRIMARY_URL}${requestUrl}`,
       data,
       ...config,
-      timeout: 5000, 
+      timeout: config.timeout || 15000, 
     });
     return response;
   } catch (error) {
@@ -42,7 +42,7 @@ export const axiosWithFallback = async (method, endpoint, data = null, config = 
          url: `${FALLBACK_URL}${requestUrl}`,
          data,
          ...config,
-         timeout: 60000, 
+         timeout: Math.max(config.timeout || 0, 60000), 
        });
        return fallbackResponse;
     }

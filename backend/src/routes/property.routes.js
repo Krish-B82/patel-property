@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Import middleware
 const authMiddleware = require('../middleware/authMiddleware');
+const optionalAuthMiddleware = require('../middleware/optionalAuthMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 // Import controller functions
@@ -19,10 +20,12 @@ const {
 } = require('../controllers/propertyController');
 
 // PUBLIC ROUTES (No authentication required - anyone can access)
-router.get('/', getAllProperties);           
+// We use optionalAuthMiddleware so that IF an admin is making the request,
+// we can detect it and send their secret fields back to them securely.
+router.get('/', optionalAuthMiddleware, getAllProperties);           
 router.get('/popular-areas', getPopularAreas);  // 🆕 ADD THIS LINE
-router.get('/:id', getPropertyById);         
-router.get('/code/:code', getPropertyByCode);
+router.get('/:id', optionalAuthMiddleware, getPropertyById);         
+router.get('/code/:code', optionalAuthMiddleware, getPropertyByCode);
 
 // PROTECTED ROUTES (Authentication required - admin only)
 router.post('/', authMiddleware, createProperty);        

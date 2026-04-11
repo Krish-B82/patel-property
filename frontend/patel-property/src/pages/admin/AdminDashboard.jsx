@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getAllProperties, deleteProperty } from '../../services/api';
-import { Home, Building2, MapPin } from 'lucide-react';
+import { Home, Building2, MapPin, Search } from 'lucide-react';
 import PropertyTable from '../../components/admin/PropertyTable';
+import Pagination from '../../components/property/Pagination';
 
 const AdminDashboard = () => {
     const [properties, setProperties] = useState([]);
@@ -15,6 +16,14 @@ const AdminDashboard = () => {
         plot: 0,
         office: 0,
     });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
+
+    // Reset to page 1 whenever search term changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
 
     useEffect(() => {
         fetchProperties();
@@ -23,8 +32,8 @@ const AdminDashboard = () => {
     const fetchProperties = async () => {
         try {
             setLoading(true);
-            // Fetch all properties, including sold
-            const data = await getAllProperties({});
+            // Fetch properties with a high limit to ensure admin sees all
+            const data = await getAllProperties({ limit: 1000 });
             const props = data.properties || [];
             setProperties(props);
 
@@ -117,11 +126,52 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Property List */}
-                <div className="bg-white rounded-xl shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4">All Properties</h2>
-                    <PropertyTable properties={properties} onDelete={handleDelete} />
+                {/* Compute filter & pagination */}
+                {(() => {
+                    const filteredProperties = properties.filter(p => 
+                        p.code.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
+                    const paginatedProperties = filteredProperties.slice(
+                        (currentPage - 1) * ITEMS_PER_PAGE, 
+                        currentPage * ITEMS_PER_PAGE
+                    );
+
+                    return (
+                        <div className="bg-white rounded-xl shadow-md p-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                <h2 className="text-xl font-bold">All Properties ({filteredProperties.length})</h2>
+                        
+                        <div className="relative w-full sm:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search by Property Code..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+                    
+                    <PropertyTable 
+                        properties={paginatedProperties} 
+                        onDelete={handleDelete} 
+                    />
+
+                    {/* Dashboard Pagination */}
+                    {totalPages > 1 && (
+                        <div className="mt-6 flex justify-center">
+                            <Pagination 
+                                currentPage={currentPage} 
+                                totalPages={totalPages} 
+                                onPageChange={setCurrentPage} 
+                            />
+                        </div>
+                    )}
                 </div>
+            );
+        })()}
             </div>
         </AdminLayout>
     );

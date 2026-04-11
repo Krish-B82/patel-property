@@ -6,6 +6,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AddProperty from './pages/admin/AddProperty';
+import ViewProperty from './pages/admin/ViewProperty';
 import ProtectedRoute from './utils/ProtectedRoute';
 
 function App() {
@@ -52,6 +53,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AddProperty />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/view-property/:id" 
+          element={
+            <ProtectedRoute>
+              <ViewProperty />
             </ProtectedRoute>
           } 
         />

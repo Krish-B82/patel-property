@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Edit, Trash2, ExternalLink } from 'lucide-react';
+import { Edit, Trash2, ExternalLink, Eye } from 'lucide-react';
 import { formatPrice } from '../../utils/helpers';
 
 const PropertyTable = ({ properties, onDelete }) => {
@@ -71,10 +71,17 @@ const PropertyTable = ({ properties, onDelete }) => {
                             <td className="px-6 py-4 text-right">
                                 <div className="flex justify-end gap-2">
                                     <Link
+                                        to={`/admin/view-property/${property.id}`}
+                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                        title="View Admin Details"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                    </Link>
+                                    <Link
                                         to={`/property/${property.id}`}
                                         target="_blank"
                                         className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition"
-                                        title="View Property"
+                                        title="View Public Page"
                                     >
                                         <ExternalLink className="w-4 h-4" />
                                     </Link>
