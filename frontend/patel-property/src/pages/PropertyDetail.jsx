@@ -89,7 +89,7 @@ const PropertyDetail = () => {
                             <span>{property.location}, {property.city || 'Vadodara'}</span>
                         </div>
                         <p className="text-3xl font-bold text-black mb-6">
-                            {formatPrice(property.min_price)} - {formatPrice(property.max_price)}
+                            {formatPrice(property.max_price)}
                         </p>
 
                         {/* Property Details */}

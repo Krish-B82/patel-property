@@ -52,13 +52,8 @@ const PropertyTable = ({ properties, onDelete }) => {
                             <td className="px-6 py-4 text-gray-600">{property.property_type}</td>
                             <td className="px-6 py-4">
                                 <div className="font-semibold text-gray-900">
-                                    {formatPrice(property.min_price)}
+                                    {formatPrice(property.max_price)}
                                 </div>
-                                {property.max_price && property.max_price > property.min_price && (
-                                    <div className="text-xs text-gray-500">
-                                        to {formatPrice(property.max_price)}
-                                    </div>
-                                )}
                             </td>
                             <td className="px-6 py-4">
                                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${property.status === 'Active' ? 'bg-green-100 text-green-700' :

@@ -18,7 +18,7 @@ const apiCall = async (endpoint, options = {}) => {
       headers,
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'API Error');
+    if (!response.ok) throw new Error(data.error || data.message || 'API Error');
     return data;
   } catch (error) {
     console.error('API Error:', error);

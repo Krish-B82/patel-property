@@ -97,7 +97,7 @@ const PropertyForm = ({ initialData, isEditing }) => {
             setExistingImages(prev => prev.filter((_, i) => i !== imageIndex));
         } catch (err) {
             console.error('Error deleting image:', err);
-            const errorMsg = err.response?.data?.message || err.message || 'Unknown network error';
+            const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Unknown network error';
             alert(`Failed to delete image: ${errorMsg}`);
         }
     };
@@ -195,7 +195,11 @@ const PropertyForm = ({ initialData, isEditing }) => {
         } catch (err) {
             console.error('Save error:', err);
             // Support both standard axios errors and our custom thrown errors
-            setError(err.response?.data?.message || err.message || 'Failed to save property. Please try again.');
+            if (err.response?.status === 401) {
+                setError(err.response?.data?.error || err.response?.data?.message || 'Your session has expired. Please log out and log in again.');
+                return;
+            }
+            setError(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to save property. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -317,21 +321,20 @@ const PropertyForm = ({ initialData, isEditing }) => {
                             />
                         </div>
 
-                        <div>
+                        <div className="hidden">
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Min Price (₹) *</label>
                             <input
                                 type="number"
                                 name="min_price"
                                 value={formData.min_price}
                                 onChange={handleChange}
-                                required
                                 min="0"
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Max Price (₹) *</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Price (₹) *</label>
                             <input
                                 type="number"
                                 name="max_price"
@@ -345,49 +348,46 @@ const PropertyForm = ({ initialData, isEditing }) => {
                     </div>
                 </div>
 
-                {/* Details - Only show if not a plot or office */}
-                {!['plot', 'office'].includes(formData.property_type) && (
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-bold text-gray-900 border-b pb-2">Property Details</h2>
+                {/* Property Details for all types */}
+                <div className="space-y-4">
+                    <h2 className="text-xl font-bold text-gray-900 border-b pb-2">Property Details</h2>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Area (sq.ft)</label>
-                                <input
-                                    type="number"
-                                    name="area_sqft"
-                                    value={formData.area_sqft}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-                                />
-                            </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Area (sq.ft)</label>
+                            <input
+                                type="number"
+                                name="area_sqft"
+                                value={formData.area_sqft}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                            />
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Bedrooms *</label>
-                                <input
-                                    type="number"
-                                    name="bedrooms"
-                                    value={formData.bedrooms}
-                                    onChange={handleChange}
-                                    required={!['plot', 'office'].includes(formData.property_type)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Bedrooms</label>
+                            <input
+                                type="number"
+                                name="bedrooms"
+                                value={formData.bedrooms}
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                            />
+                        </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Bathrooms</label>
-                                <input
-                                    type="number"
-                                    name="bathrooms"
-                                    value={formData.bathrooms}
-                                    min="0"
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">Bathrooms</label>
+                            <input
+                                type="number"
+                                name="bathrooms"
+                                value={formData.bathrooms}
+                                min="0"
+                                onChange={handleChange}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                            />
                         </div>
                     </div>
-                )}
+                </div>
 
                 {/* Extra Info */}
                 <div className="space-y-4">

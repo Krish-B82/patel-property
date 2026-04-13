@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Maximize, Home, Share2 } from 'lucide-react';
+import { MapPin, Maximize, Home } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { formatPrice, getWhatsAppLink } from '../../utils/constants';
 
@@ -57,13 +57,6 @@ const PropertyCard = ({ property }) => {
           </div>
         )}
 
-        <button
-          onClick={handleShare}
-          className="absolute top-3 left-3 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 transition"
-        >
-          <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
-        </button>
-
         {isNew() && (
           <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold">
             New
@@ -78,7 +71,7 @@ const PropertyCard = ({ property }) => {
         </h3>
 
         <p className="text-lg sm:text-xl font-bold text-black mb-2 sm:mb-3">
-          {formatPrice(min_price)} - {formatPrice(max_price)}
+          {formatPrice(max_price)}
         </p>
 
         <div className="flex items-center gap-1.5 sm:gap-2 text-gray-600 mb-3 sm:mb-4">
